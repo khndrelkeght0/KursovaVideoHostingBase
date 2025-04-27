@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ series.title }} — Перегляд</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background-color: #111; color: white; font-family: sans-serif; text-align: center;">
+    <h1>{{ series.title }}</h1>
+
+    {% if series.type != 'news' %}
+    <form method="get">
+        <label for="episode">Оберіть серію:</label>
+        <select name="episode" id="episode" onchange="this.form.submit()">
+            {% for ep in series.episodes %}
+                <option value="{{ ep }}" {% if ep == episode %}selected{% endif %}>Серія {{ ep }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+
+    <div style="margin-top: 20px;">
+        <video width="720" controls>
+            <source src="{{ url_for('static', filename=video_path) }}" type="video/mp4">
+            Ваш браузер не підтримує відео.
+        </video>
+    </div>
+
+    <br>
+    <a href="{{ url_for('index') }}" style="color: #ff33cc;">← Назад до каталогу</a>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Курсова Тест</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        let isAdmin = false;
+
+        function login() {
+            const username = prompt("Введіть логін:");
+            const password = prompt("Введіть пароль:");
+            if (username === "Admin" && password === "123123123") {
+                isAdmin = true;
+                document.getElementById("admin-link").style.display = "inline-block";
+                alert("Успішний вхід як Адмін");
+            } else {
+                alert("Невірні дані");
+            }
+        }
+
+        function toggleRegisterForm() {
+            const form = document.getElementById("register-form");
+            form.style.display = (form.style.display === "none") ? "block" : "none";
+        }
+
+        function validateRegistration() {
+            const email = document.getElementById("email").value;
+            const username = document.getElementById("reg-username").value;
+            const password = document.getElementById("reg-password").value;
+            const confirm = document.getElementById("confirm-password").value;
+
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const passwordPattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+
+            if (!emailPattern.test(email)) {
+                alert("Невірний формат електронної пошти");
+                return;
+            }
+            if (!passwordPattern.test(password)) {
+                alert("Пароль має містити мінімум 8 символів, одну цифру та один спецсимвол");
+                return;
+            }
+            if (password !== confirm) {
+                alert("Паролі не співпадають");
+                return;
+            }
+            alert("Реєстрація пройшла успішно (імітація)");
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById("admin-link").addEventListener("click", function(event) {
+                event.preventDefault();
+                document.getElementById("admin").style.display = "block";
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>КУРСОВА ТЕСТ</h1>
+        <nav>
+            <a href="#" class="filter-button" data-type="all">Усі</a>
+            <a href="#" class="filter-button" data-type="anime">Аніме</a>
+            <a href="#" class="filter-button" data-type="series">Серіали</a>
+            <a href="#" class="filter-button" data-type="film">Фільми</a>
+            <a href="#" class="filter-button" data-type="news">Новини</a>
+            <a href="#" onclick="login()">Увійти</a>
+            <a href="#" onclick="toggleRegisterForm()">Реєстрація</a>
+            <a href="#admin" id="admin-link" style="display:none">Додати</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="register-form" style="display:none; background-color: #1e1e1e; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; color: white;">
+            <h2>Форма реєстрації</h2>
+            <form onsubmit="event.preventDefault(); validateRegistration();">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="example@email.com" required><br><br>
+
+                <label for="reg-username">Логін:</label>
+                <input type="text" id="reg-username" placeholder="Ваш логін" required><br><br>
+
+                <label for="reg-password">Пароль:</label>
+                <input type="password" id="reg-password" required><br><br>
+
+                <label for="confirm-password">Підтвердження паролю:</label>
+                <input type="password" id="confirm-password" required><br><br>
+
+                <button type="submit">Зареєструватись</button>
+            </form>
+        </div>
+
+        <div class="container">
+            {% for item in series %}
+            <div class="card" data-type="{{ item.type }}">
+                <a href="{{ url_for('watch', series_id=item.id) }}">
+                    <img src="{{ url_for('static', filename=item.cover) }}" alt="{{ item.title }}">
+                    <p>{{ item.title }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Адмін-форма -->
+        <section id="admin" style="display:none; background-color: #1e1e1e; padding: 20px; margin: 20px; border-radius: 10px; color: white;">
+            <h2>Додати контент</h2>
+            <form action="{{ url_for('add_content') }}" method="post" enctype="multipart/form-data">
+                <label>Тип:</label>
+                <select name="type" required>
+                    <option value="anime">Аніме</option>
+                    <option value="series">Серіал</option>
+                    <option value="film">Фільм</option>
+                    <option value="news">Новина</option>
+                </select><br><br>
+
+                <label>Назва:</label>
+                <input type="text" name="title" placeholder="Назва контенту" required><br><br>
+
+                <label>Зображення (PNG):</label>
+                <input type="file" name="cover" accept=".png" required><br><br>
+
+                <label>Перша серія (MP4):</label>
+                <input type="file" name="episode" accept=".mp4" required><br><br>
+
+                <button type="submit">Додати</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const buttons = document.querySelectorAll('.filter-button');
+        const cards = document.querySelectorAll('.card');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+
+                cards.forEach(card => {
+                    if (type === 'all' || card.getAttribute('data-type') === type) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
